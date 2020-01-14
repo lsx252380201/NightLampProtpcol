@@ -78,4 +78,8 @@ public class ProtpcolUtil {
 
         return result;
     }
+
+    public static String aa(){
+        return "aa";
+    }
 }
