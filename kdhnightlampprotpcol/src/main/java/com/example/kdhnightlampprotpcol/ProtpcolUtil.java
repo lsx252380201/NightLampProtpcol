@@ -1,5 +1,7 @@
 package com.example.kdhnightlampprotpcol;
 
+import android.text.TextUtils;
+
 public class ProtpcolUtil {
     private static String write = "03";
     private static String read = "02";
@@ -34,6 +36,43 @@ public class ProtpcolUtil {
             hex = "0" + hex;
         }
         return hex;
+    }
+
+    private static int formatting(String a) {
+        int i = 0;
+        for (int u = 0; u < 10; u++) {
+            if (a.equals(String.valueOf(u))) {
+                i = u;
+            }
+        }
+        if (a.equals("a")) {
+            i = 10;
+        }
+        if (a.equals("b")) {
+            i = 11;
+        }
+        if (a.equals("c")) {
+            i = 12;
+        }
+        if (a.equals("d")) {
+            i = 13;
+        }
+        if (a.equals("e")) {
+            i = 14;
+        }
+        if (a.equals("f")) {
+            i = 15;
+        }
+        return i;
+    }
+
+    private static String toD(String a, int b) {
+        int r = 0;
+        for (int i = 0; i < a.length(); i++) {
+            r = (int) (r + formatting(a.substring(i, i + 1))
+                    * Math.pow(b, a.length() - i - 1));
+        }
+        return String.valueOf(r);
     }
 
     public static String SetColor(String mac,int type,int ColorR,int ColorG,int ColorB){
@@ -79,7 +118,98 @@ public class ProtpcolUtil {
         return result;
     }
 
-    public static String ab(){
-        return "aa";
+    private static int isRightRespond(String data,int location){
+        int result = 0;
+
+        if(data.length() < location + 4 || location <= 0){
+            return result;
+        }
+
+        if(data.length() >= location + 4){
+            switch (data.substring(location + 2, location+ 4)){
+                case "01":
+                    if(data.length() >= location + 6){
+                        result = 1;
+                    }
+                    break;
+
+                case "02":
+                    if(data.length() >= location + 8){
+                        result = 2;
+                    }
+                    break;
+
+                case "03":
+                    if(data.length() >= location + 6){
+                        result = 3;
+                    }
+                    break;
+
+                case "04":
+                    if(data.length() >= location + 8){
+                        result = 4;
+                    }
+                    break;
+
+                case "05":
+                    if(data.length() >= location + 10){
+                        result = 5;
+                    }
+                    break;
+
+                case "06":
+                    if(data.length() >= location + 10){
+                        result = 6;
+                    }
+                    break;
+            }
+        }
+
+        return result;
+    }
+
+    private static int GetLocation(String data1,String code){
+        int result = 0;
+
+        if(data1.contains(code)){
+            result = data1.indexOf(code) + code.length();
+        }
+
+        return result;
+    }
+
+    private static int location;
+    public static String ParseData(String pData,String mac){
+        String result = "";
+
+        if(pData == null || TextUtils.equals("",pData) || !pData.contains("020104")){
+            return result;
+        }
+
+        if(TextUtils.equals("",mac) && pData.length() >= 32){
+            return pData.substring(24,32);
+        }
+
+        if(!TextUtils.equals("",mac) && pData.contains(mac)){
+            location = GetLocation(pData,mac);
+            switch (isRightRespond(pData,location)){
+                case 1:
+                case 3:
+                    result = pData.substring(location + 2, location + 6);
+                    break;
+
+                case 2:
+                case 4:
+                    result = pData.substring(location + 2, location + 8);
+                    break;
+
+                case 5:
+                case 6:
+                    result = pData.substring(location + 2, location + 10);
+                    break;
+            }
+        }
+
+        return result;
     }
 }
